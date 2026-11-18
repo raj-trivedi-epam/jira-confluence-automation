@@ -15,6 +15,8 @@ library. It uses only the Python standard library.
 - Aggregates current active-sprint status and story-point progress, and counts
   only issues resolved within the rolling seven-day period that are still
   resolved at report time.
+- Reports current sprint scope only; it does not reconstruct the sprint's
+  original commitment or scope changes.
 - Writes a dated Markdown report atomically under `reports/`. A Jira fetch or
   validation failure happens before the existing dated report is replaced.
 - Omits issue keys, summaries, and assignee names from the report. Missing

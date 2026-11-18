@@ -3,7 +3,7 @@
 import json
 import re
 import time
-from datetime import date
+from datetime import date, datetime
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, urlsplit
 from urllib.request import Request, urlopen
@@ -24,9 +24,16 @@ class JiraClient:
         sleep=time.sleep,
     ):
         parsed_url = urlsplit(base_url)
-        if parsed_url.scheme != "https" or not parsed_url.netloc:
+        if (
+            parsed_url.scheme != "https"
+            or not parsed_url.netloc
+            or parsed_url.username
+            or parsed_url.password
+            or parsed_url.query
+            or parsed_url.fragment
+        ):
             raise ValueError("Jira base URL must be an HTTPS URL.")
-        if max_attempts < 1:
+        if isinstance(max_attempts, bool) or max_attempts < 1:
             raise ValueError("max_attempts must be at least 1.")
         if not callable(access_token_provider):
             raise TypeError("access_token_provider must be callable.")
@@ -96,7 +103,7 @@ class JiraClient:
             items = page[collection_key]
             results.extend(items)
             total = page.get("total")
-            if not isinstance(total, int) or total < 0:
+            if isinstance(total, bool) or not isinstance(total, int) or total < 0:
                 raise JiraError("Jira response has an invalid pagination total.")
             if start_at + len(items) >= total:
                 return results
@@ -122,7 +129,7 @@ class JiraClient:
             page_params["nextPageToken"] = token
 
     def active_sprint(self, board_id):
-        if not isinstance(board_id, int) or board_id < 1:
+        if isinstance(board_id, bool) or not isinstance(board_id, int) or board_id < 1:
             raise ValueError("board_id must be a positive integer.")
         sprints = self._get_all(
             "rest/agile/1.0/board/{}/sprint".format(board_id),
@@ -138,11 +145,17 @@ class JiraClient:
         return sprints[0]
 
     def sprint_issues(self, sprint_id, fields, project_key=None):
-        if not isinstance(sprint_id, int) or sprint_id < 1:
+        if (
+            isinstance(sprint_id, bool)
+            or not isinstance(sprint_id, int)
+            or sprint_id < 1
+        ):
             raise ValueError("sprint_id must be a positive integer.")
         params = {"fields": ",".join(fields)}
         if project_key is not None:
-            if not re.fullmatch(r"[A-Z][A-Z0-9_]*", project_key):
+            if not isinstance(project_key, str) or not re.fullmatch(
+                r"[A-Z][A-Z0-9_]*", project_key
+            ):
                 raise ValueError("project_key must be an uppercase Jira project key.")
             params["jql"] = 'project = "{}"'.format(project_key)
         return self._get_all(
@@ -172,9 +185,16 @@ class JiraClient:
         return field_id
 
     def resolved_issues(self, project_key, start_date, end_date, fields):
-        if not re.fullmatch(r"[A-Z][A-Z0-9_]*", project_key):
+        if not isinstance(project_key, str) or not re.fullmatch(
+            r"[A-Z][A-Z0-9_]*", project_key
+        ):
             raise ValueError("project_key must be an uppercase Jira project key.")
-        if not isinstance(start_date, date) or not isinstance(end_date, date):
+        if (
+            not isinstance(start_date, date)
+            or isinstance(start_date, datetime)
+            or not isinstance(end_date, date)
+            or isinstance(end_date, datetime)
+        ):
             raise TypeError("start_date and end_date must be date objects.")
         if start_date >= end_date:
             raise ValueError("start_date must be earlier than end_date.")

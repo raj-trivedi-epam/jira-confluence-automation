@@ -116,7 +116,7 @@ class ReportTests(unittest.TestCase):
             report = Path(report_path).read_text(encoding="utf-8")
 
         self.assertIn("1 issue(s), 3 story points", report)
-        self.assertIn("Known committed story points | 8", report)
+        self.assertIn("Known active-sprint story points | 8", report)
         self.assertIn("Completed story points | 5", report)
         self.assertIn("Remaining story points | 3", report)
         self.assertIn("1 active sprint issue(s) have no story-point estimate", report)

@@ -17,7 +17,7 @@ def generate_weekly_report(
         raise ValueError("generated_at must be timezone-aware.")
     if not project_key:
         raise ValueError("project_key is required.")
-    if not isinstance(board_id, int) or board_id < 1:
+    if isinstance(board_id, bool) or not isinstance(board_id, int) or board_id < 1:
         raise ValueError("board_id must be a positive integer.")
 
     field_id = jira_client.find_field_id(story_points_field_name)

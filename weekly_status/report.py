@@ -64,6 +64,23 @@ def _parse_jira_datetime(value):
     return parsed
 
 
+def _markdown_text(value):
+    return (
+        str(value)
+        .replace("\\", "\\\\")
+        .replace("|", "\\|")
+        .replace("\r", " ")
+        .replace("\n", " ")
+    )
+
+
+def _format_sprint_date(value):
+    parsed = _parse_jira_datetime(value)
+    if parsed is None:
+        return "Not recorded"
+    return parsed.astimezone(REPORT_TIMEZONE).strftime("%B %-d, %Y")
+
+
 def format_weekly_report(
     generated_at,
     active_sprint,
@@ -76,10 +93,10 @@ def format_weekly_report(
         raise ValueError("generated_at must be timezone-aware.")
     local_generated = generated_at.astimezone(REPORT_TIMEZONE)
     period_start = local_generated - timedelta(days=7)
-    sprint_start = active_sprint.get("startDate") or "Not recorded"
-    sprint_end = active_sprint.get("endDate") or "Not recorded"
-    sprint_name = active_sprint.get("name") or "Active sprint"
-    sprint_goal = active_sprint.get("goal") or "Not recorded"
+    sprint_start = _format_sprint_date(active_sprint.get("startDate"))
+    sprint_end = _format_sprint_date(active_sprint.get("endDate"))
+    sprint_name = _markdown_text(active_sprint.get("name") or "Active sprint")
+    sprint_goal = _markdown_text(active_sprint.get("goal") or "Not recorded")
 
     completed_count = 0
     completed_points = 0
@@ -145,7 +162,7 @@ def format_weekly_report(
         )
 
     status_lines = [
-        "- {}: {} issue(s)".format(name, count)
+        "- {}: {} issue(s)".format(_markdown_text(name), count)
         for name, count in sorted(status_counts.items(), key=lambda item: item[0].lower())
     ]
     if not status_lines:
@@ -196,7 +213,7 @@ def format_weekly_report(
 
 | Measure | Value |
 | --- | ---: |
-| Known committed story points | {} |
+| Known active-sprint story points | {} |
 | Completed story points | {} |
 | Remaining story points | {} |
 
@@ -226,13 +243,13 @@ Status breakdown:
         sprint_name,
         sprint_start,
         sprint_end,
-        sprint_goal.replace("\n", " "),
+        sprint_goal,
         _format_points(committed_points),
         _format_points(completed_sprint_points),
         _format_points(remaining_points),
         "\n".join(status_lines),
         blocker_summary,
-        "\n".join("- {}".format(note) for note in notes),
+        "\n".join("- {}".format(_markdown_text(note)) for note in notes),
     )
 
 
