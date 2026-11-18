@@ -9,3 +9,7 @@ Each entry below is an instruction file with a one-line description.
 - [`./instructions/create-status-report.agent.md`](./create-status-report.agent.md) — Instructions for generating weekly status reports.
   + Keywords: status report, weekly report, stakeholder report, report generation
   + Target: `reports/**/*.md`, `weekly_status/**/*.py`
+
+- [`./instructions/update-confluence-page.agent.md`](./update-confluence-page.agent.md) — Instructions for safely transforming project status reports and updating a Confluence page.
+  + Keywords: Confluence, Confluence page, update page, publish status, project status page
+  + Target: `reports/**/*.md`, `work/**/*.md`
