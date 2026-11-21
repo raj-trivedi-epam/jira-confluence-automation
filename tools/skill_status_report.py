@@ -194,7 +194,7 @@ def main() -> None:
 
     try:
         issues = load_issues(args)
-        report = format_status_report(issues, args.start_date, args.end_date)
+        report = format_status_report(issues, start_date, end_date)
     except (OSError, ValueError) as error:
         parser.error(str(error))
 
