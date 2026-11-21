@@ -1,30 +1,15 @@
 # Confluence Project Status Page Update Instructions
 
-- Accept input only as one JSON object; reject standalone URLs, page IDs, Markdown reports, and separate option values.
-- Treat the JSON input shape and property names below as a stable contract.
+- Accept these input forms:
+  + A Confluence page URL or page ID.
+  + A project status report in Markdown.
+  + Optional `title`, `parent page ID`, and `dry-run` values.
+- Treat these accepted input forms as a stable contract.
   + Do not change, broaden, or replace the accepted format during unrelated edits.
-  + Change the contract only when the user explicitly requests a format change; if the intended JSON shape is unclear, ask before editing or processing.
-- Require the JSON object to contain:
-  + `page`: an object with exactly one of `url` or `id` identifying the existing Confluence page.
-  + `statusReport`: an object with exactly one of `markdown` or `path` containing the report content or a workspace-relative Markdown file path.
-- Accept only these optional JSON properties:
-  + `title`: a string for the page title.
-  + `parentPageId`: a string or number, used only when page creation is explicitly permitted.
-  + `dryRun`: a boolean that defaults to `true`.
-  + `publish`: a boolean that defaults to `false`.
-- Publish only when the JSON explicitly sets both `publish` to `true` and `dryRun` to `false`; reject `publish: true` when `dryRun` is omitted or `true`.
-- Reject invalid JSON, missing required values, unknown properties, conflicting alternatives, and invalid property types before processing.
-- Example input:
-  ```json
-  {
-    "page": {"id": "123456"},
-    "statusReport": {"path": "reports/weekly-status-report-2026-11-18.md"},
-    "dryRun": true
-  }
-  ```
-- Require a valid page target and status report content before processing.
-  + Do not treat a page URL or ID, Markdown report, or option value supplied outside the JSON object as a request.
-  + Do not publish unless the JSON contains both explicit `publish: true` and `dryRun: false`.
+  + Change the accepted forms only when the user explicitly requests a format change; if the intended format is unclear, ask before editing or processing.
+- Require both a page URL or page ID and status report content before processing; accept them as separate inputs or together in one request.
+  + Treat `dry-run` as `true` by default.
+  + Treat a separate, explicit publish request as approval to update the live page.
 - Read the status report completely before transforming or publishing it.
 - Validate required report fields: reporting period, overall status, executive summary, delivery update, blockers and risks, and data notes.
 - Preserve aggregate-only stakeholder-safe content.

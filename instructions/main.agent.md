@@ -13,3 +13,11 @@ Each entry below is an instruction file with a one-line description.
 - [`./instructions/update-confluence-page.agent.md`](./update-confluence-page.agent.md) — Instructions for safely transforming project status reports and updating a Confluence page.
   + Keywords: Confluence, Confluence page, update page, publish status, project status page
   + Target: `reports/**/*.md`, `work/**/*.md`
+
+- [`./instructions/calculate-compound-interest.agent.md`](./calculate-compound-interest.agent.md) — Instructions for invoking the compound interest calculation tool and presenting its results.
+  + Keywords: compound interest, calculate interest, investment growth, compounding
+  + Target: `tools/compound_interest.py`
+
+- [`./instructions/use-status-report-skill.agent.md`](./use-status-report-skill.agent.md) — Instructions for invoking the Jira issue Markdown status report skill.
+  + Keywords: Jira status report, format issues, weekly status, skill status report
+  + Target: `tools/skill_status_report.py`
