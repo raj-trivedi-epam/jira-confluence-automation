@@ -8,16 +8,16 @@ This backlog translates the project specification into actionable implementation
 - [ ] Confirm the target Jira group is exactly `Cloud_project` and verify its membership contains the intended 12 team members.
 - [ ] Confirm the Jira project roles and permissions needed for delivery-manager read-only access and stakeholder-safe reporting.
 - [ ] Confirm the Scrum board setup, sprint cadence, and the association between the new project, sprint schedule, and reporting windows.
-- [ ] Verify workflow configuration: `To Do -> In Progress -> Done` and ensure Epic, Story, and Task issue types exist.
-- [ ] Validate the team’s Jira access model and ensure client/leadership stakeholders do not need Jira access for report review.
-- [ ] Create the repository structure for the Python CLI app, configuration files, and reports output directory.
-- [ ] Define the local project layout for source code, tests, credentials handling, logs, and generated report files.
-- [ ] Create a baseline Python environment and dependency manifest for the CLI app, HTTP client, secure storage integration, and date/time handling.
-- [ ] Decide the local secure credential storage strategy (for example macOS Keychain) and document the exact OAuth configuration flow.
-- [ ] Confirm the target computer scheduler (`launchd`) supports the Friday 3:00 PM Asia/Kolkata schedule and one-time catch-up behavior.
-- [ ] Define the failure-notification approach for missed runs, including whether a local log and failed-run status is sufficient.
-- [ ] Confirm the exact Jira blocker field/flag/label that will be used for risk reporting before implementation depends on it.
-- [ ] Confirm the completion logic, sprint reporting rules, missing-estimate handling, and naming convention for generated reports before the app is locked in.
+- [ ] Verify workflow configuration: `To Do -> In Progress -> Done` and ensure Epic, Story, and Task issue types exist. (GitHub issue #29)
+- [ ] Validate the team’s Jira access model and ensure client/leadership stakeholders do not need Jira access for report review. (GitHub issue #30)
+- [ ] Create the repository structure for the Python CLI app, configuration files, and reports output directory. (GitHub issue #31)
+- [ ] Define the local project layout for source code, tests, credentials handling, logs, and generated report files. (GitHub issue #32)
+- [ ] Create a baseline Python environment and dependency manifest for the CLI app, HTTP client, secure storage integration, and date/time handling. (GitHub issue #33)
+- [ ] Decide the local secure credential storage strategy (for example macOS Keychain) and document the exact OAuth configuration flow. (GitHub issues #15, #34, #35)
+- [ ] Confirm the target computer scheduler (`launchd`) supports the Friday 3:00 PM Asia/Kolkata schedule and one-time catch-up behavior. (GitHub issues #16, #36)
+- [ ] Define the failure-notification approach for missed runs, including whether a local log and failed-run status is sufficient. (GitHub issues #14, #17, #20, #21, #37)
+- [ ] Confirm the exact Jira blocker field/flag/label that will be used for risk reporting before implementation depends on it. (GitHub issues #5, #7, #9, #11, #13, #18, #22, #24, #26, #28)
+- [ ] Confirm the completion logic, sprint reporting rules, missing-estimate handling, and naming convention for generated reports before the app is locked in. (GitHub issues #1, #2, #3, #4, #6, #8, #10, #12, #19, #23, #25, #27)
 
 ## Phase 2: Core Features
 
