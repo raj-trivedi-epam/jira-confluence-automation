@@ -17,6 +17,8 @@
 
 **Status:** Blocked
 
+**Evidence:** [External Jira Configuration Checklist](./external-config.md)
+
 **Description:** Confirm the Jira site URL, approved project key or approved replacement, board ID, and active-sprint behavior.
 
 **Acceptance criteria**
