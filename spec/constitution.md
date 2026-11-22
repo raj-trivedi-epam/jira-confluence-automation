@@ -35,6 +35,11 @@ Confluence integration is out of the active implementation scope until its requi
    - Pin application and database images by a supported major or explicit version.
    - Never include credentials or tokens in images or committed Compose files.
 
+5. **Local prototype deployment**
+   - Bind Express and Vite to loopback only.
+   - Treat the prototype as a trusted single-operator local application.
+   - Do not expose Jira OAuth secrets or privileged operations to browser JavaScript.
+
 ## Core Product Rules
 
 1. Jira reporting must remain aggregate-only. Shared reports must not include issue keys, raw comments, assignee names, or individual performance comparisons.

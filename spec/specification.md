@@ -1,6 +1,6 @@
 # Feature Specification: Jira/Confluence Automation
 
-**Status:** Draft
+**Status:** Clarified prototype specification
 **Owner:** Delivery Manager
 **Constitution:** [constitution.md](./constitution.md)
 **Source specification:** [project_spec.md](../project_spec.md)
@@ -16,7 +16,7 @@ The implemented prototype will use:
 - Node.js and Express for the backend
 - PostgreSQL 15 in Docker for persistence
 - Jira Cloud REST APIs for read-only delivery data
-- macOS `launchd` for the planned weekly schedule, subject to validation
+- A scheduler-independent worker entry point for scheduled execution; `launchd` integration is deferred
 
 The first implementation priority is the weekly status workflow. Confluence publishing is not in the initial scope and must not be implemented or enabled without separate requirements and authorization.
 
@@ -38,11 +38,15 @@ The application must make source data gaps explicit rather than guessing or trea
 
 ## 4. Non-Goals
 
-- Creating a Jira project, Scrum board, or project configuration unless the separate setup workflow is explicitly selected.
+- Creating or modifying a Jira project, Scrum board, project permissions, or project configuration.
+- A 15-minute sprint dashboard or assignee-level reporting.
 - Granting Jira project access or changing Jira permissions.
 - Providing issue-level detail or per-person comparisons in stakeholder reports.
 - Automatically emailing, publishing, or otherwise distributing reports.
 - Automatically updating or publishing Confluence pages.
+- Selecting a manual reporting period other than the current rolling seven-day period.
+- Automated missed-run catch-up, external report distribution, and Jira failure notifications.
+- A multi-user application authentication system; the prototype is local and single-operator.
 - Inferring blocker status from comments or issue text.
 - Inventing missing metrics or substituting values for unavailable Jira fields.
 
@@ -82,7 +86,7 @@ Starts or stops the application, checks local logs, manages credentials, and ver
 ### US-02: Generate a report manually
 
 **As** a Delivery Manager,
-**I want** to generate a report for a selected or current reporting period,
+**I want** to generate a report for the current rolling reporting period,
 **so that** I can prepare a stakeholder update on demand.
 
 **Acceptance criteria**
@@ -110,15 +114,15 @@ Starts or stops the application, checks local logs, manages credentials, and ver
 ### US-04: Schedule a weekly report
 
 **As** a System Operator,
-**I want** the report generator to run Friday at 3:00 PM Asia/Kolkata,
+**I want** a scheduler-compatible report worker,
 **so that** reports are prepared consistently.
 
 **Acceptance criteria**
 
-- `launchd` configuration is validated on the target macOS computer before release.
-- The scheduled action invokes the same generation service as manual generation.
-- Missed-run catch-up behavior is enabled only if supported and documented.
-- A scheduled run records timestamp, outcome, and any non-sensitive error details.
+- The scheduler-independent worker entry point is available for future `launchd` integration.
+- When invoked by a scheduler, the worker uses the same generation service as manual generation.
+- Automated missed-run catch-up is out of scope.
+- A worker run records timestamp, outcome, and any non-sensitive error details.
 
 ### US-05: Handle unavailable or incomplete Jira data
 
@@ -172,6 +176,9 @@ Starts or stops the application, checks local logs, manages credentials, and ver
 ### FR-04: Reporting period
 
 - The normal reporting period is the rolling seven days ending at generation time.
+- The interval is `[generationTime - 7 days, generationTime]`, with the end exclusive.
+- Convert Jira timestamps to UTC for comparison and render them in Asia/Kolkata.
+- Manual regeneration creates a dated revision; it does not silently overwrite prior content.
 - Both the period and generation timestamp must be formatted in Asia/Kolkata.
 - The active sprint snapshot must be captured at the same generation time.
 
@@ -179,12 +186,17 @@ Starts or stops the application, checks local logs, manages credentials, and ver
 
 - Work is completed only when resolved during the reporting period and remains resolved at report time.
 - Reopened issues must be excluded from completed totals.
-- The implementation must use Jira’s resolution timestamp or changelog evidence rather than silently assuming that current status is sufficient.
+- Completion requires Jira Done status category plus a resolution timestamp or validated resolution changelog transition.
+- Missing resolution evidence fails the issue for completion rather than counting or estimating it.
 
 ### FR-06: Sprint aggregation
 
 - Sprint progress must use project story-point values.
 - Committed, completed, and remaining story points must be calculated independently.
+- The `JIRA_STORY_POINTS_FIELD_ID` configuration value is required; no alternate field fallback is allowed.
+- Committed points come from the active-sprint snapshot.
+- Completed points include only completed issues that are members of that snapshot.
+- Remaining points equal committed points minus completed points after validation.
 - Missing estimates must remain visible as unavailable data, not zero.
 - If sprint or estimate data is unavailable, the report must say so in `Sprint Progress` or `Data Notes`.
 
@@ -194,6 +206,7 @@ Starts or stops the application, checks local logs, manages credentials, and ver
 - Blockers must be derived only from that agreed marker.
 - The report must include impact and the available mitigation or next-update information.
 - If no blocker marker is confirmed, blocker reporting must state that it is unavailable.
+- The UI/report must distinguish confirmed blockers, no confirmed blockers, marker not configured, and blocker data unavailable.
 
 ### FR-08: Report structure
 
@@ -218,6 +231,7 @@ The report must distinguish verified facts, forecasts, decisions, missing data, 
 
 - Reports must use Markdown and the existing template conventions.
 - Report filenames must use `weekly-status-report-YYYY-MM-DD.md`, with the date in Asia/Kolkata.
+- A same-day revision uses `weekly-status-report-YYYY-MM-DD-rNN.md`.
 - Reports must be written atomically so a failure cannot truncate or replace a prior report.
 - A report may be created only after data validation and required report fields pass.
 
@@ -226,11 +240,13 @@ The report must distinguish verified facts, forecasts, decisions, missing data, 
 - Reports must remain local and require a human review state.
 - The application must not email or publish generated reports.
 - A review action must record reviewer, timestamp, and review status without storing unnecessary source issue data.
+- The local OS account is the prototype reviewer identity. No role model or remote application login is required.
+- Review remains reversible until external sharing is implemented.
 
 ### FR-11: Scheduling
 
-- The scheduled job must run Friday at 3:00 PM Asia/Kolkata.
-- A missed-run catch-up attempt must be allowed only after scheduler support is confirmed.
+- The prototype must expose a scheduler-independent worker entry point.
+- Automated `launchd` configuration and missed-run catch-up are out of scope.
 - Scheduled and manual runs must share a single generation pipeline.
 
 ### FR-12: Operational logging
@@ -244,6 +260,7 @@ The report must distinguish verified facts, forecasts, decisions, missing data, 
 PostgreSQL 15 must persist only data needed for configuration, report records, review state, and run history.
 
 The application must use migrations for schema changes and parameterized database access.
+PostgreSQL runs in Docker on loopback; migrations run explicitly, a named volume persists local data, and database credentials do not enter source or image files.
 
 ### FR-14: Confluence boundary
 
@@ -280,7 +297,14 @@ The application must use migrations for schema changes and parameterized databas
 
 ## 9. API and Error Requirements
 
-The application must expose a small set of backend APIs for configuration status, report generation, report review, and run history.
+The application must expose these prototype backend APIs:
+
+- `GET /api/configuration/status`
+- `PATCH /api/configuration` for non-secret configuration only
+- `GET /api/runs`
+- `POST /api/runs`
+- `GET /api/reports/:id`
+- `POST /api/reports/:id/review`
 
 Every API response must:
 
@@ -290,11 +314,13 @@ Every API response must:
 - Preserve safe details needed for operator troubleshooting
 
 Generation and review operations must be idempotent or provide explicit concurrency behavior for repeated submissions.
+Express and Vite bind to `127.0.0.1`. The prototype is one trusted local operator and requires no remote login or role model. State-changing API methods are loopback-only; if cookies are introduced, CSRF protection is required.
 
 ## 10. Data Entities
 
 ### JiraConfiguration
 
+- UUID primary key
 - Jira site URL
 - Project key
 - Board ID
@@ -303,9 +329,12 @@ Generation and review operations must be idempotent or provide explicit concurre
 - Time zone
 - Validation status
 - Updated timestamp
+- OAuth secrets are held only in the selected secure credential provider
 
 ### Report
 
+- UUID primary key
+- Associated run ID
 - Reporting period start
 - Reporting period end
 - Generation timestamp
@@ -315,9 +344,12 @@ Generation and review operations must be idempotent or provide explicit concurre
 - Review status
 - Reviewer
 - Review timestamp
+- Canonical Markdown file path
 
 ### RunRecord
 
+- UUID primary key
+- Start and end timestamps
 - Trigger type: manual or scheduled
 - Start and end timestamps
 - Status: success, skipped, or failed
@@ -346,18 +378,24 @@ Generation and review operations must be idempotent or provide explicit concurre
 
 ## 12. Open Decisions
 
-1. Confirm Jira project key availability and Jira administrator approval.
-2. Confirm the exact Jira OAuth app, authorization flow, and read-only scopes.
-3. Confirm the secure local credential provider.
-4. Confirm `Cloud_project` membership and required Jira project role.
-5. Confirm the project blocker field, flag, or label.
-6. Confirm Scrum board and sprint association.
-7. Confirm `launchd` support and catch-up behavior.
-8. Decide whether failure notification is required beyond local logs and run status.
-9. Confirm whether PostgreSQL stores report text or only metadata and file paths.
-10. Confirm future Confluence scope, target page or space, and publish authorization.
+External setup decisions still need confirmation before live Jira use:
 
-No open decision may be silently converted into a confirmed requirement.
+1. The Jira site and project key are available and permitted.
+2. The Jira administrator approves OAuth 2.0 3LO and read-only scopes.
+3. The project has the intended 12-member `Cloud_project` group and the required read-only project role.
+4. The Jira Scrum board ID and active-sprint behavior are confirmed.
+5. The Jira story-point custom field ID is confirmed.
+6. The blocker field, field ID, or label is confirmed.
+
+The following items are deliberately resolved as prototype constraints:
+
+- Node.js/Express supersedes the original Python CLI proposal.
+- Confluence integration and sprint-dashboard features are out of scope.
+- macOS Keychain stores OAuth credentials.
+- The app is loopback-only and has one local operator.
+- Markdown files are canonical report artifacts; PostgreSQL stores metadata and paths.
+- Manual and scheduled workers use a rolling seven-day period only.
+- Automated catch-up and external distribution are out of scope.
 
 ## 13. Security and Privacy Requirements
 
