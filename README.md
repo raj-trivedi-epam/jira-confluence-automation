@@ -103,3 +103,7 @@ additional implementation details.
 - `reports/` — report templates and generated report examples.
 - `instructions/` — task-specific guidance for report and Confluence workflows.
 - `tools/` — supporting scripts and local MCP demonstration servers.
+
+Run `python3 tools/check_meeting_notes.py` to scan repository Markdown files
+identified as meeting notes or minutes. The checker reports each file
+individually and exits with a non-zero status if required sections are missing.
