@@ -467,6 +467,7 @@ The feature is successful when:
 - [ ] Complete test and acceptance review passes.
 
 ## Commit History
+f31ee9a pending files
 0a35ae6 module 17
 f1a0723 module 17
 f270d6e spec files
@@ -482,7 +483,7 @@ fa94428 module 10 commit
 6b82f86 Initial commit
 
 ## Commit Count
-13
+14
 
 ## Project Files
 .env.example
@@ -505,6 +506,8 @@ apps/api/src/server.ts
 apps/api/src/services/credentials/.gitkeep
 apps/api/src/services/jira/.gitkeep
 apps/api/src/services/reporting/.gitkeep
+apps/web/dist/assets/index-VL_uKEKs.js
+apps/web/dist/index.html
 apps/web/index.html
 apps/web/node_modules/.bin/nanoid
 apps/web/node_modules/.bin/rolldown
@@ -1433,6 +1436,7 @@ reports/template.md
 reports/weekly-status-report-2026-11-18.md
 reports/weekly-status-report-2026-11-28.md
 spec/analyze.md
+spec/checklist.md
 spec/clarify.md
 spec/constitution.md
 spec/external-config.md
@@ -1467,4 +1471,5 @@ work/module-13-report.md
 work/module-14-report.md
 work/module-15-report.md
 work/module-16-report.md
+work/module-17-report.md
 work/module03-task
