@@ -467,6 +467,9 @@ The feature is successful when:
 - [ ] Complete test and acceptance review passes.
 
 ## Commit History
+2d5da8a implement report generation
+4dec45a docs: refresh Module 17 completion report
+81b4515 fixing issues related to the module
 11b2271 feat: add PostgreSQL schema migration
 190b3cb feat: implement Express API and Jira configuration validation
 019ca50 feat: configure React 18 frontend and remove dependencies
@@ -486,7 +489,7 @@ fa94428 module 10 commit
 6b82f86 Initial commit
 
 ## Commit Count
-17
+20
 
 ## Project Files
 .env.example
@@ -511,7 +514,6 @@ apps/api/src/server.ts
 apps/api/src/services/credentials/.gitkeep
 apps/api/src/services/jira/.gitkeep
 apps/api/src/services/reporting/.gitkeep
-apps/web/dist/index.html
 apps/web/index.html
 apps/web/package-lock.json
 apps/web/package.json
