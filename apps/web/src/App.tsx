@@ -1,4 +1,8 @@
 export default function App() {
+  const runHealthCheck = async () => {
+    await fetch("http://127.0.0.1:3001/health");
+  };
+
   return (
     <main
       style={{
@@ -29,7 +33,7 @@ export default function App() {
         </p>
         <button
           type="button"
-          disabled
+          onClick={runHealthCheck}
           style={{
             border: 0,
             borderRadius: "6px",
