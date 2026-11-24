@@ -13,6 +13,14 @@
       "args": [
         "tools/mcp_text_stats_server.py"
       ]
+    },
+    "chrome-devtools": {
+      "type": "stdio",
+      "command": "bash",
+      "args": [
+        "-c",
+        "source \"$HOME/.nvm/nvm.sh\" && exec npx -y chrome-devtools-mcp@latest --channel stable --isolated"
+      ]
     }
   }
 }

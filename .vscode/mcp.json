@@ -17,6 +17,14 @@
     "github": { 
       "type": "http", 
       "url": "https://api.githubcopilot.com/mcp/"
-    }  
+    },
+    "chrome-devtools": {
+      "type": "stdio",
+      "command": "bash",
+      "args": [
+        "-c",
+        "source \"$HOME/.nvm/nvm.sh\" && exec npx -y chrome-devtools-mcp@latest --channel stable --isolated"
+      ]
+    }
   }
 }

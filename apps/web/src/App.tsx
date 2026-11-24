@@ -1,6 +1,59 @@
+import { useState } from "react";
+
+interface GeneratedReport {
+  id: string;
+  generatedAt: string;
+  canonicalPath: string;
+  content: string;
+}
+
+interface RunRecord {
+  id: string;
+  status: "success" | "failed";
+  startedAt: string;
+  endedAt: string;
+  reportId?: string;
+  reportPath?: string;
+}
+
+type GenerationResponse =
+  | { data: { run: RunRecord; report: GeneratedReport } }
+  | { error: { code: string; message: string } };
+
 export default function App() {
-  const runHealthCheck = async () => {
-    await fetch("http://127.0.0.1:3001/health");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [report, setReport] = useState<GeneratedReport | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const generateReport = async () => {
+    setIsGenerating(true);
+    setError(null);
+    setReport(null);
+
+    try {
+      const response = await fetch("http://127.0.0.1:3001/api/runs", {
+        method: "POST",
+      });
+      const payload: GenerationResponse = await response.json();
+
+      if (!response.ok || !("data" in payload)) {
+        throw new Error(
+          "error" in payload
+            ? payload.error.message
+            : `Report generation failed (${response.status}).`,
+        );
+      }
+
+      setReport(payload.data.report);
+    } catch (generationError) {
+      setError(
+        generationError instanceof Error
+          ? generationError.message
+          : "An unexpected error prevented report generation.",
+      );
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -29,22 +82,51 @@ export default function App() {
         </p>
         <h1 style={{ marginBottom: "8px" }}>Jira/Confluence Automation</h1>
         <p style={{ color: "#505f79" }}>
-          React 18 frontend is running on loopback.
+          Demo mode only — no live Jira data is connected. Generated demo
+          reports are not factual project updates and must not be shared.
         </p>
         <button
           type="button"
-          onClick={runHealthCheck}
+          onClick={generateReport}
+          disabled={isGenerating}
           style={{
             border: 0,
             borderRadius: "6px",
             padding: "10px 14px",
-            background: "#dfe1e6",
+            background: isGenerating ? "#f1f2f4" : "#dfe1e6",
             color: "#172b4d",
             fontWeight: 600,
+            cursor: isGenerating ? "wait" : "pointer",
           }}
         >
-          Generate report
+          {isGenerating ? "Generating…" : "Generate report"}
         </button>
+        {error && (
+          <p role="alert" style={{ color: "#ae2e24" }}>
+            {error}
+          </p>
+        )}
+        {report && (
+          <section aria-labelledby="generated-report-title">
+            <p role="status" style={{ color: "#216e4e", fontWeight: 600 }}>
+              Demo report generated successfully.
+            </p>
+            <h2 id="generated-report-title">Generated report</h2>
+            <p>
+              Saved to <code>{report.canonicalPath}</code>
+            </p>
+            <pre
+              style={{
+                padding: "16px",
+                borderRadius: "6px",
+                background: "#f6f7f9",
+                whiteSpace: "pre-wrap",
+              }}
+            >
+              {report.content}
+            </pre>
+          </section>
+        )}
       </section>
     </main>
   );

@@ -55,7 +55,7 @@ Current verified runtime:
 | Requirement | Status | Evidence and result |
 |---|---|---|
 | US-01 Configure Jira integration | Partially implemented | T001 validation module exists and passes 3 tests; no OAuth, Keychain, UI, or live Jira validation exists. |
-| US-02 Generate a report manually | Not implemented | Frontend button is disabled; no API generation route or worker exists. |
+| US-02 Generate a report manually | Partially implemented | The UI can create and display a clearly labeled mock report via `POST /api/runs`; live Jira-backed generation, scheduling, and persistence are not implemented. |
 | US-03 Review a generated report | Not implemented | No report preview or review endpoint/UI exists. |
 | US-04 Scheduler-compatible report worker | Not implemented | No worker entry point exists. |
 | US-05 Incomplete Jira data handling | Partially implemented | Legacy Jira/report code has validation and failure behavior; no complete Node workflow. |
@@ -172,7 +172,7 @@ Current verified runtime:
 |---|---|---|
 | React 18 + Vite | Not compliant | Vite is present, but React is `19.3.1`, not React 18. |
 | Dashboard with integration/run status | Not implemented | Placeholder only. |
-| Manual report action | Not implemented | Button is disabled. |
+| Manual report action | Partially implemented | Button creates a mock report and surfaces its status, path, and Markdown content; it is not a factual Jira report. |
 | Report preview/review controls | Not implemented | No preview or review controls. |
 | Missing-data/failure explanations | Not implemented | Placeholder UI only. |
 | No credential display | Implemented | UI contains no credential fields or secrets. |
@@ -184,7 +184,7 @@ Current verified runtime:
 |---|---|---|
 | Node.js + Express | Implemented but not Express package | Node HTTP server exists and works; it is not Express. |
 | Input validation | Partially implemented | T001 URL/key/board/sprint validation exists. |
-| Explicit report/config/run routes | Not implemented | Only `/health` is present. |
+| Explicit report/config/run routes | Partially implemented | Health, configuration status, and mock manual-run routes exist; report retrieval, review, and live Jira generation are absent. |
 | Jira service isolation | Not implemented | No Node Jira integration. |
 | Separate reporting/persistence modules | Not implemented | Placeholders only. |
 | Least-privilege OAuth/secure credentials | Not implemented | No OAuth or Keychain implementation. |
@@ -204,8 +204,8 @@ Current verified runtime:
 |---|---|---|
 | `GET /api/configuration/status` | Not implemented | Server exposes only `/health`. |
 | `PATCH /api/configuration` | Not implemented | No route. |
-| `GET /api/runs` | Not implemented | No route. |
-| `POST /api/runs` | Not implemented | No route. |
+| `GET /api/runs` | Partially implemented | Returns process-local manual run outcomes; history is not persisted to PostgreSQL. |
+| `POST /api/runs` | Partially implemented | Creates a local mock report; live Jira retrieval and PostgreSQL persistence are not implemented. |
 | `GET /api/reports/:id` | Not implemented | No route. |
 | `POST /api/reports/:id/review` | Not implemented | No route. |
 | Stable JSON success/error envelopes | Not implemented | `/health` and 404 use ad hoc JSON. |
@@ -279,7 +279,7 @@ Current verified runtime:
 
 | Requirement | Status | Evidence |
 |---|---|---|
-| Successful run creates dated report | Not implemented | No Node run workflow. Legacy generator exists separately. |
+| Successful run creates dated report | Partially implemented | Mock run writes a dated, revision-safe Markdown file under `work/mock-reports`; live Jira-backed generation is not implemented. |
 | Aggregate-only report content | Implemented in legacy; unverified in prototype | Legacy renderer is aggregate-oriented. |
 | 7-day/sprint calculations agree with Jira | Not verified | No live Jira and no Node implementation. |
 | Missing estimates/unavailable metrics explicit | Implemented in legacy | Legacy tests and report renderer cover missing data. |
@@ -292,10 +292,10 @@ Current verified runtime:
 
 ## Overall Result
 
-- **Implemented and locally verified:** loopback frontend/API skeleton, T001 Jira connection validator, Vite build, and legacy Python Jira/report tests.
+- **Implemented and locally verified:** loopback frontend/API, mock report generation and display, T001 Jira connection validator, Vite build, and legacy Python Jira/report tests.
 - **Implemented but not verified:** legacy Jira/reporting generation and atomic file behavior.
 - **Partial:** Jira validation, legacy reporting, missing-estimate/blocker behavior.
-- **Not implemented:** OAuth/Keychain, PostgreSQL persistence, migrations, complete API routes, review workflow, worker, run history, and report generation UI.
+- **Not implemented:** OAuth/Keychain, PostgreSQL persistence, migrations, complete API routes, review workflow, and scheduler-compatible worker. The report UI currently generates demo data only.
 - **Out of scope:** Confluence, launchd/catch-up, sprint dashboard, distribution, and manual period selection.
 
-**Prototype readiness:** Not ready for live Jira report generation. The next implementation priorities are PostgreSQL migrations/runtime, React 18 replacement, Express implementation, OAuth/Keychain, Jira API adapter, generation pipeline, report persistence, and review/run-history UI.
+**Prototype readiness:** Not ready for live Jira report generation. The next implementation priorities are PostgreSQL persistence, OAuth/Keychain, Jira API adapter, the live-data generation pipeline, report persistence, and review UI.
